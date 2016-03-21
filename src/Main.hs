@@ -2,10 +2,14 @@ module Main where
 
 import Functions
 import Types
+import Tree
 
 main = do
     functions
     types
+
+    print $ Tree.treeFromList [15,34,1,3,5,7,2,4,23,45,8]
+
     where
         functions = do
             print(evenSumInt [1..100])
