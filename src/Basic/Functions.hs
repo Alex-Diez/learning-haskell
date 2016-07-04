@@ -1,4 +1,4 @@
-module Functions where
+module Basic.Functions where
 
 import Data.List (foldl')
 

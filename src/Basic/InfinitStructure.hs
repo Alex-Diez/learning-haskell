@@ -1,4 +1,4 @@
-module InfinitStructure where
+module Basic.InfinitStructure where
 
 import Data.List
 

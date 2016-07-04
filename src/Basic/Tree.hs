@@ -1,4 +1,4 @@
-module Tree where
+module Basic.Tree where
 
 import Data.List
 

@@ -1,4 +1,4 @@
-module Types where
+module Basic.Types where
 
 -- type synonims
 type Name   = String

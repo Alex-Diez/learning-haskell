@@ -1,11 +1,16 @@
 module Main where
 
-import Functions
-import Types
-import Tree
-import InfinitStructure
+putStrLn' str = do
+    putStr str
+    putChar '\n'
+
+putQStrLn str = do
+    putChar '\"'
+    putStr str
+    putChar '\"'
+    putChar '\n'
 
 main = do
-    print $ take' 10 numbers
-    print $ treeTakeDepth 4 nullTree
-    print $ treeTakeDepth 4 infTreeTwo
+    putStrLn "Enter text: "
+    str <- getLine
+    putQStrLn str
