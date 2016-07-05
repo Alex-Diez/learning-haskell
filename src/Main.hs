@@ -1,16 +1,15 @@
 module Main where
 
-putStrLn' str = do
-    putStr str
-    putChar '\n'
+    import qualified Data.Map as Map
+    import SymbolicCalc.Lexer
+    import SymbolicCalc.Parser
+    import SymbolicCalc.Evaluator
 
-putQStrLn str = do
-    putChar '\"'
-    putStr str
-    putChar '\"'
-    putChar '\n'
-
-main = do
-    putStrLn "Enter text: "
-    str <- getLine
-    putQStrLn str
+    main :: IO ()
+    main = do
+        let tokens = tokenize "x1 = -15 / (2 + x2)"
+        print tokens
+        let node = parse tokens
+        print node
+        let val = evaluate node Map.empty
+        print val
