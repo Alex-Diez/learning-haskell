@@ -7,9 +7,21 @@ module Main where
 
     main :: IO ()
     main = do
-        let tokens = tokenize "x1 = -15 / (2 + x2)"
-        print tokens
-        let node = parse tokens
-        print node
-        let val = evaluate node Map.empty
-        print val
+        loop (Map.fromList [("pi", pi), ("e", exp 1.0)])
+
+    loop table = do
+        str <- getLine
+        if null str
+            then return ()
+            else
+                let tokens = tokenize str
+                    node = parse tokens
+                    Ev ev = evaluate node table
+                in
+                    case ev of
+                        Left message -> do
+                            putStrLn $ "Error: " ++ message
+                            loop table
+                        Right (val, table') -> do
+                            print val
+                            loop table'
