@@ -6,53 +6,52 @@ module SymbolicCalc.Evaluator (evaluate, SymbolTable, Evaluator(..)) where
 
     type SymbolTable = MapLib.Map String Double
 
-    newtype Evaluator a = Ev (Either String a)
+    newtype Evaluator a = Evaluator (SymbolTable -> (a, SymbolTable))
 
     instance Monad Evaluator where
-        (Ev ev) >>= continuation =
-            case ev of
-                Left message    -> Ev (Left message)
-                Right value     -> continuation value
-        return val = Ev (Right val)
-        fail message = Ev (Left message)
+        (Evaluator action) >>= continuation = Evaluator $
+            \table ->
+                let (value, table') = action table
+                    (Evaluator action') = continuation value
+                in action' table'
+        return val = Evaluator (\table -> (val, table))
 
-    evaluate :: Node -> SymbolTable -> Evaluator (Double, SymbolTable)
-    evaluate (SumNode op left right) table = do
-        (left', table')     <- evaluate left table
-        (right', table'')   <- evaluate right table'
+    evaluate :: Node -> Evaluator Double
+    evaluate (SumNode op left right) = do
+        left'   <- evaluate left
+        right'  <- evaluate right
         case op of
-            Add -> return (left' + right', table'')
-            Sub -> return (left' - right', table'')
+            Add -> return $ left' + right'
+            Sub -> return $ left' - right'
 
-    evaluate (ProdNode op left right) table = do
-        (left', table')     <- evaluate left table
-        (right', table'')   <- evaluate right table'
+    evaluate (ProdNode op left right) = do
+        left'   <- evaluate left
+        right'  <- evaluate right
         case op of
-            Mul -> return (left' * right', table'')
-            Div -> return (left' / right', table'')
+            Mul -> return $ left' * right'
+            Div -> return $ left' / right'
 
-    evaluate (UnaryNode op node) table = do
-        (val, table') <- evaluate node table
+    evaluate (UnaryNode op node) = do
+        val <- evaluate node
         case op of
-            Add -> return (val, table')
-            Sub -> return (-val, table')
+            Add -> return val
+            Sub -> return (-val)
 
-    evaluate (NumNode num) table = return (num, table)
+    evaluate (NumNode num) = return num
 
-    evaluate (VarNode var) table = lookUp var table
+    evaluate (VarNode var) = lookUp var
 
-    evaluate (AssignNode var node) table = do
-        (v, table')     <- evaluate node table
-        (_, table'')    <- addSymbol var v table'
-        return (v, table'')
+    evaluate (AssignNode var node) = do
+        v <- evaluate node
+        addSymbol var v
 
-    lookUp :: String -> SymbolTable -> Evaluator (Double, SymbolTable)
-    lookUp varName table =
+    lookUp :: String -> Evaluator Double
+    lookUp varName = Evaluator $ \table ->
         case MapLib.lookup varName table of
-            Just v -> return (v, table)
-            Nothing -> fail ("Undefined variable " ++ varName)
+            Just v -> (v, table)
+            Nothing -> error $ "Undefined variable " ++ varName
 
-    addSymbol :: String -> Double -> SymbolTable -> Evaluator ((), SymbolTable)
-    addSymbol varName varVal table =
+    addSymbol :: String -> Double -> Evaluator Double
+    addSymbol varName varVal = Evaluator $ \table ->
         let table' = MapLib.insert varName varVal table
-        in return ((), table')
+        in (varVal, table')

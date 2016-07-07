@@ -16,12 +16,8 @@ module Main where
             else
                 let tokens = tokenize str
                     node = parse tokens
-                    Ev ev = evaluate node table
-                in
-                    case ev of
-                        Left message -> do
-                            putStrLn $ "Error: " ++ message
-                            loop table
-                        Right (val, table') -> do
-                            print val
-                            loop table'
+                    Evaluator action = evaluate node
+                    (val, table') = action table
+                in do
+                    print val
+                    loop table'
