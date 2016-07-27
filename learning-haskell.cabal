@@ -8,3 +8,5 @@ executable learning-haskell
   hs-source-dirs:   src
   build-depends:    base
                     , containers
+                    , HUnit
+                    , hspec
